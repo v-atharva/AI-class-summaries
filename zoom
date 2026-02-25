@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+
+SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$SOURCE" ]]; do
+  BASE_DIR="$(cd -P "$(/usr/bin/dirname "$SOURCE")" && /bin/pwd)"
+  SOURCE="$("/usr/bin/readlink" "$SOURCE")"
+  [[ "$SOURCE" != /* ]] && SOURCE="$BASE_DIR/$SOURCE"
+done
+DIR="$(cd -P "$(/usr/bin/dirname "$SOURCE")" && /bin/pwd)"
+
+if [[ -x "$DIR/.venv/bin/python3" ]]; then
+  exec "$DIR/.venv/bin/python3" -m zoom_downloader.cli "$@"
+fi
+
+if [[ -x "$DIR/venv/bin/python3" ]]; then
+  exec "$DIR/venv/bin/python3" -m zoom_downloader.cli "$@"
+fi
+
+if command -v python3 >/dev/null 2>&1; then
+  exec python3 -m zoom_downloader.cli "$@"
+fi
+
+echo "Error: python3 not found on PATH." >&2
+exit 1
